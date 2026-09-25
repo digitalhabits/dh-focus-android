@@ -1,5 +1,6 @@
 package net.kollnig.greasemilkyway;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.robolectric.Shadows.shadowOf;
@@ -8,6 +9,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.view.View;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +29,13 @@ public class CustomRulesActivityTest {
                 .putBoolean("picker_intro_shown", true).commit();
         CustomRulesActivity activity = Robolectric.buildActivity(CustomRulesActivity.class)
                 .create().start().resume().visible().get();
+        if (!context.getResources().getBoolean(R.bool.show_custom_rules_fab)) {
+            assertEquals(View.GONE,
+                    activity.findViewById(R.id.custom_rules_opening_button).getVisibility());
+            assertEquals(View.GONE,
+                    activity.findViewById(R.id.custom_rules_button).getVisibility());
+            return;
+        }
         NotificationManager manager = (NotificationManager)
                 context.getSystemService(Context.NOTIFICATION_SERVICE);
 
