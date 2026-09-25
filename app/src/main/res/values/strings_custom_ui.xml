@@ -48,10 +48,9 @@
     <string name="app_detail_off">Blocking is off</string>
     <string name="app_detail_paused_until">Paused · resumes %1$s</string>
     <string name="hide_something_new">Hide something new</string>
+    <string name="change_opening_screen">Change opening screen</string>
+    <string name="pause_blocking_for">Pause blocking for</string>
     <string name="pause_default_placeholder">Pause</string>
-    <string name="open_place_on_launch">Open a place on launch instead</string>
-    <string name="picker_guided_title">Hide something new</string>
-    <string name="picker_guided_message">We’ll open %1$s with the picker on. Tap the thing that distracts you; you can adjust the selection before saving.</string>
     <string name="picker_service_unavailable">Enable accessibility access before starting the picker.</string>
     <string name="picker_app_unavailable">This app cannot be opened automatically.</string>
     <string name="pause_or_disable_title">Pause or turn off?</string>
