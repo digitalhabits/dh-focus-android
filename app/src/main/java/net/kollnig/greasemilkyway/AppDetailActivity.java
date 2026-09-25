@@ -89,9 +89,15 @@ public class AppDetailActivity extends AppCompatActivity implements FrictionGate
         findViewById(R.id.pause_longer).setOnClickListener(view -> pauseForChip(2));
 
         MaterialButton picker = findViewById(R.id.guided_picker);
-        picker.setVisibility(getResources().getBoolean(R.bool.show_custom_rules_fab)
-                ? View.VISIBLE : View.GONE);
-        picker.setOnClickListener(view -> showPickerChoice());
+        MaterialButton openingPicker = findViewById(R.id.opening_picker);
+        int pickerVisibility = getResources().getBoolean(R.bool.show_custom_rules_fab)
+                ? View.VISIBLE : View.GONE;
+        picker.setVisibility(pickerVisibility);
+        openingPicker.setVisibility(pickerVisibility);
+        picker.setOnClickListener(view -> startGuidedPicker(EnumSet.of(
+                ElementPickerOverlay.Mode.BLOCK, ElementPickerOverlay.Mode.BLOCK_ALL)));
+        openingPicker.setOnClickListener(view -> startGuidedPicker(EnumSet.of(
+                ElementPickerOverlay.Mode.NAVIGATE)));
     }
 
     @Override
@@ -168,19 +174,6 @@ public class AppDetailActivity extends AppCompatActivity implements FrictionGate
                     notifyService();
                     load();
                 }, this::load);
-    }
-
-    private void showPickerChoice() {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.picker_guided_title)
-                .setMessage(getString(R.string.picker_guided_message,
-                        AppCatalog.getDisplayName(this, packageName)))
-                .setPositiveButton(R.string.hide_something_new, (dialog, which) ->
-                        startGuidedPicker(EnumSet.of(ElementPickerOverlay.Mode.BLOCK,
-                                ElementPickerOverlay.Mode.BLOCK_ALL)))
-                .setNegativeButton(R.string.open_place_on_launch, (dialog, which) ->
-                        startGuidedPicker(EnumSet.of(ElementPickerOverlay.Mode.NAVIGATE)))
-                .show();
     }
 
     private void startGuidedPicker(EnumSet<ElementPickerOverlay.Mode> modes) {

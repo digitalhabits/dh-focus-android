@@ -42,6 +42,7 @@ import java.util.Map;
 public class CustomRulesActivity extends AppCompatActivity implements FrictionGateHost {
     private static final String PREFS_NAME = "picker_prefs";
     private static final String KEY_PICKER_INTRO_SHOWN = "picker_intro_shown";
+    private static final String STATE_PICKER_NAVIGATION = "picker_navigation";
 
     private EditText rulesEditor;
     private View listContainer;
@@ -52,6 +53,7 @@ public class CustomRulesActivity extends AppCompatActivity implements FrictionGa
     private CustomRulesAdapter adapter;
     private boolean expertMode;
     private boolean editorHasInvalidText;
+    private boolean pickerNavigationRequested;
     private Runnable pendingFrictionAction;
 
     private final ActivityResultLauncher<Intent> frictionGateLauncher =
@@ -77,6 +79,9 @@ public class CustomRulesActivity extends AppCompatActivity implements FrictionGa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            pickerNavigationRequested = savedInstanceState.getBoolean(STATE_PICKER_NAVIGATION);
+        }
         setContentView(R.layout.activity_custom_rules);
         NavigationBarHelper.setup(this);
         setupInsets();
@@ -115,10 +120,13 @@ public class CustomRulesActivity extends AppCompatActivity implements FrictionGa
         }
 
         View addButton = findViewById(R.id.custom_rules_button);
+        View openingButton = findViewById(R.id.custom_rules_opening_button);
         if (getResources().getBoolean(R.bool.show_custom_rules_fab)) {
-            addButton.setOnClickListener(v -> onAddClicked());
+            addButton.setOnClickListener(v -> onAddClicked(false));
+            openingButton.setOnClickListener(v -> onAddClicked(true));
         } else {
             addButton.setVisibility(View.GONE);
+            openingButton.setVisibility(View.GONE);
         }
         findViewById(R.id.edit_rules_as_text).setOnClickListener(v -> showExpertEditor());
         findViewById(R.id.back_to_rule_list).setOnClickListener(v -> leaveExpertEditor());
@@ -142,6 +150,12 @@ public class CustomRulesActivity extends AppCompatActivity implements FrictionGa
             editorHasInvalidText = !saveRules();
         }
         super.onPause();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(STATE_PICKER_NAVIGATION, pickerNavigationRequested);
+        super.onSaveInstanceState(outState);
     }
 
     private void reloadRuleList() {
@@ -358,13 +372,16 @@ public class CustomRulesActivity extends AppCompatActivity implements FrictionGa
         frictionGateLauncher.launch(intent);
     }
 
-    private void onAddClicked() {
+    private void onAddClicked(boolean navigationPicker) {
+        pickerNavigationRequested = navigationPicker;
         boolean introShown = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 .getBoolean(KEY_PICKER_INTRO_SHOWN, false);
         if (!introShown) {
             new AlertDialog.Builder(this)
-                    .setTitle(R.string.picker_intro_title)
-                    .setMessage(R.string.picker_intro_message)
+                    .setTitle(navigationPicker
+                            ? R.string.picker_navigation_intro_title : R.string.picker_intro_title)
+                    .setMessage(navigationPicker
+                            ? R.string.picker_navigation_intro_message : R.string.picker_intro_message)
                     .setPositiveButton(R.string.picker_intro_enable,
                             (dialog, which) -> requestNotificationPermissionAndShow())
                     .setNegativeButton(R.string.picker_intro_cancel, null)
@@ -389,7 +406,7 @@ public class CustomRulesActivity extends AppCompatActivity implements FrictionGa
     }
 
     private void showPickerNotification() {
-        new ElementPickerNotification(this).showNotification();
+        new ElementPickerNotification(this).showNotification(pickerNavigationRequested);
         Toast.makeText(this, R.string.picker_notification_shown, Toast.LENGTH_SHORT).show();
     }
 

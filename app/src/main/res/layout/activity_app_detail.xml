@@ -71,6 +71,18 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/pause_blocking_for"
+        android:textAppearance="?attr/textAppearanceLabelLarge"
+        android:textColor="@color/text_light"
+        android:textStyle="bold" />
+
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -125,11 +137,28 @@
         android:paddingBottom="16dp" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/opening_picker"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:minHeight="48dp"
+        android:text="@string/change_opening_screen"
+        android:textAllCaps="false"
+        android:textColor="@color/primary_blue"
+        app:backgroundTint="@color/white"
+        app:cornerRadius="24dp"
+        app:strokeColor="@color/primary_blue"
+        app:strokeWidth="1dp" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/guided_picker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"
         android:minHeight="48dp"
         android:text="@string/hide_something_new"
