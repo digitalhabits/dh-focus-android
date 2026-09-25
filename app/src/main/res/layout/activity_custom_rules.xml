@@ -56,6 +56,16 @@
                 android:visibility="gone" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/custom_rules_opening_button"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:minHeight="48dp"
+                android:text="@string/change_opening_screen" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/custom_rules_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

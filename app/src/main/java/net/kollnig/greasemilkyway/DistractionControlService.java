@@ -127,7 +127,12 @@ public class DistractionControlService extends BaseDistractionControlService {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 if (ElementPickerNotification.ACTION_START_PICKER.equals(action)) {
-                    startPickerMode();
+                    if (intent.getBooleanExtra(
+                            ElementPickerNotification.EXTRA_NAVIGATION_PICKER, false)) {
+                        startPickerMode(null, EnumSet.of(ElementPickerOverlay.Mode.NAVIGATE));
+                    } else {
+                        startPickerMode();
+                    }
                 } else if (ElementPickerNotification.ACTION_STOP_PICKER.equals(action)) {
                     stopPickerMode();
                 }
@@ -208,7 +213,7 @@ public class DistractionControlService extends BaseDistractionControlService {
 
         Log.i(TAG, "Stopping picker mode");
         pickerOverlay.hide();
-        pickerNotification.showNotification();
+        pickerNotification.showNotification(false);
         updateRules();
     }
 

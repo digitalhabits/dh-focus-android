@@ -22,6 +22,8 @@ public class ElementPickerNotification {
 
     public static final String ACTION_START_PICKER = "net.kollnig.greasemilkyway.ACTION_START_PICKER";
     public static final String ACTION_STOP_PICKER = "net.kollnig.greasemilkyway.ACTION_STOP_PICKER";
+    public static final String EXTRA_NAVIGATION_PICKER =
+            "net.kollnig.greasemilkyway.EXTRA_NAVIGATION_PICKER";
 
     private final Context context;
     private final NotificationManager notificationManager;
@@ -56,17 +58,21 @@ public class ElementPickerNotification {
     /**
      * Shows the persistent notification with the "Pick element" action.
      */
-    public void showNotification() {
+    public void showNotification(boolean navigationPicker) {
         Intent pickerIntent = new Intent(ACTION_START_PICKER);
         pickerIntent.setPackage(context.getPackageName());
+        pickerIntent.putExtra(EXTRA_NAVIGATION_PICKER, navigationPicker);
         PendingIntent pickerPendingIntent = PendingIntent.getBroadcast(
                 context, 0, pickerIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentTitle(context.getString(R.string.picker_notification_title))
-                .setContentText(context.getString(R.string.picker_notification_text))
+                .setContentTitle(context.getString(navigationPicker
+                        ? R.string.change_opening_screen : R.string.picker_notification_title))
+                .setContentText(context.getString(navigationPicker
+                        ? R.string.picker_navigation_notification_text
+                        : R.string.picker_notification_text))
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setContentIntent(pickerPendingIntent)

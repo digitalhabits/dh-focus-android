@@ -49,6 +49,9 @@
     <string name="app_detail_paused_until">Paused · resumes %1$s</string>
     <string name="hide_something_new">Hide something new</string>
     <string name="change_opening_screen">Change opening screen</string>
+    <string name="picker_navigation_notification_text">Switch to an app, then tap here to choose where it opens.</string>
+    <string name="picker_navigation_intro_title">Choose an opening screen</string>
+    <string name="picker_navigation_intro_message">You can choose where another app opens. Enable the picker notification, then switch to that app and tap the notification to select a destination.</string>
     <string name="pause_blocking_for">Pause blocking for</string>
     <string name="pause_default_placeholder">Pause</string>
     <string name="picker_service_unavailable">Enable accessibility access before starting the picker.</string>
