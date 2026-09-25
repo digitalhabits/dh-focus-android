@@ -138,13 +138,19 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/opening_picker"
-        style="@style/Widget.Material3.Button.TextButton"
+        style="@style/Widget.Material3.Button.OutlinedButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:minHeight="48dp"
-        android:text="@string/change_opening_screen" />
+        android:text="@string/change_opening_screen"
+        android:textAllCaps="false"
+        android:textColor="@color/primary_blue"
+        app:backgroundTint="@color/white"
+        app:cornerRadius="24dp"
+        app:strokeColor="@color/primary_blue"
+        app:strokeWidth="1dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/guided_picker"
