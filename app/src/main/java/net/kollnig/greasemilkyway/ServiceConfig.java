@@ -15,8 +15,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -197,6 +199,65 @@ public class ServiceConfig {
         editor.apply();
     }
 
+    /**
+     * Gives a built-in rule with no saved state the saved state of a sibling in its row.
+     *
+     * <p>A row is on only while every rule in it is, and a rule starts off. So a rule added to
+     * an existing row by a later release would otherwise switch that row off for everyone who
+     * had turned it on, with nothing to tell them their block had stopped.
+     */
+    void inheritSiblingState(List<FilterRule> rules) {
+        Map<String, FilterRule> savedByRow = new HashMap<>();
+        List<FilterRule> unsaved = new ArrayList<>();
+        for (FilterRule rule : rules) {
+            String row = builtInRowKey(rule);
+            if (row == null) {
+                continue;
+            }
+            if (prefs.contains(KEY_RULE_ENABLED + ruleKeySuffix(rule))
+                    || prefs.contains(KEY_PAUSE_UNTIL_RULE_ + ruleKeySuffix(rule))) {
+                if (!savedByRow.containsKey(row)) {
+                    savedByRow.put(row, rule);
+                }
+            } else {
+                unsaved.add(rule);
+            }
+        }
+
+        SharedPreferences.Editor editor = null;
+        for (FilterRule rule : unsaved) {
+            FilterRule sibling = savedByRow.get(builtInRowKey(rule));
+            if (sibling == null) {
+                continue;
+            }
+            if (editor == null) {
+                editor = prefs.edit();
+            }
+            String from = ruleKeySuffix(sibling);
+            String to = ruleKeySuffix(rule);
+            if (prefs.contains(KEY_RULE_ENABLED + from)) {
+                editor.putBoolean(KEY_RULE_ENABLED + to,
+                        prefs.getBoolean(KEY_RULE_ENABLED + from, false));
+            }
+            if (prefs.contains(KEY_PAUSE_UNTIL_RULE_ + from)) {
+                editor.putLong(KEY_PAUSE_UNTIL_RULE_ + to,
+                        prefs.getLong(KEY_PAUSE_UNTIL_RULE_ + from, 0));
+            }
+        }
+        if (editor != null) {
+            editor.apply();
+        }
+    }
+
+    /** Mirrors how {@link RuleRows#mergeRules} groups built-in blocking rules into one row. */
+    private static String builtInRowKey(FilterRule rule) {
+        if (rule.isCustom || rule.isNavigation || rule.packageName == null) {
+            return null;
+        }
+        String comment = rule.description == null ? "" : rule.description.trim();
+        return comment.isEmpty() ? null : rule.packageName + "\n" + comment;
+    }
+
     public void setPackageDisabled(String packageName, boolean disabled) {
         String key = KEY_PACKAGE_DISABLED + packageName;
         prefs.edit().putBoolean(key, disabled).apply();
@@ -246,6 +307,7 @@ public class ServiceConfig {
         // rules' legacy state would be orphaned permanently instead of picked
         // up on a later, successful load.
         migrateRuleKeys(rules, defaultRulesReadOk);
+        inheritSiblingState(rules);
 
         // Apply saved enabled states
         long currentTime = System.currentTimeMillis();
