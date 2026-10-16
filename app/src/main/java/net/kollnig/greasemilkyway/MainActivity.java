@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements FrictionGateHost 
 
         // Initialize config
         config = new ServiceConfig(this);
+        RuleUpdates.sync(this);
 
         // Initialize views
         RecyclerView rulesList = findViewById(R.id.rules_list);

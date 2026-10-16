@@ -36,6 +36,7 @@ public class ServiceConfig {
     private static final String KEY_PAUSE_DURATION_MINS = "pause_duration_mins";
     private static final String KEY_NOTIFICATION_TIMEOUT_MS = "notification_timeout_ms";
     private static final String KEY_PREFS_VERSION = "prefs_version";
+    private static final String KEY_RULE_UPDATES_ENABLED = "rule_updates_enabled";
     /**
      * Navigation rules get their own key space. They are matched like blocking rules and so
      * can share an identity with one, but they are a separate opt-in: enabling "hide the feed"
@@ -288,6 +289,21 @@ public class ServiceConfig {
         boolean defaultRulesReadOk = defaultRuleLines != null;
         if (defaultRuleLines != null && !defaultRuleLines.isEmpty()) {
             rules.addAll(ruleParser.parseRules(defaultRuleLines.toArray(new String[0])));
+        }
+
+        // Downloaded rules only add to the bundled ones. A downloaded rule matching a bundled
+        // one is skipped, so a stale download can never override what this release ships.
+        if (isRuleUpdatesEnabled()) {
+            Set<String> known = new HashSet<>();
+            for (FilterRule rule : rules) {
+                known.add(rule.identity());
+            }
+            List<String> downloaded = RuleUpdates.readStored(context);
+            for (FilterRule rule : ruleParser.parseRules(downloaded.toArray(new String[0]))) {
+                if (known.add(rule.identity())) {
+                    rules.add(rule);
+                }
+            }
         }
 
         // Add custom rules
@@ -610,6 +626,15 @@ public class ServiceConfig {
         } else {
             setRuleEnabled(rule, enabled);
         }
+    }
+
+    /** On unless the user turns it off. */
+    public boolean isRuleUpdatesEnabled() {
+        return prefs.getBoolean(KEY_RULE_UPDATES_ENABLED, true);
+    }
+
+    public void setRuleUpdatesEnabled(boolean enabled) {
+        prefs.edit().putBoolean(KEY_RULE_UPDATES_ENABLED, enabled).apply();
     }
 
     public int getFrictionWordCount() {

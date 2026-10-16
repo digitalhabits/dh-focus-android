@@ -12,4 +12,5 @@
     <string name="accessibility_prompt_message">To hide elements, GMWay Lite needs accessibility access. Use at your own risk.</string>
     <string name="accessibility_help_title">How to enable GMWay Lite</string>
     <string name="picker_intro_message">This feature lets you pick and hide any UI element in other apps.\n\nAfter enabling, you\'ll see a notification that lets you start the element picker from any app.\n\nTo use it, GMWay Lite needs permission to show notifications.</string>
+    <string name="rule_updates_url" translatable="false">https://raw.githubusercontent.com/digitalhabits/dh-focus-android/main/app/src/gmwaylite/assets/distraction_rules.txt</string>
 </resources>

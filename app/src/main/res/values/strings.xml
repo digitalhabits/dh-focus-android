@@ -137,6 +137,9 @@
     <string name="unlock_friction_settings">Unlock friction settings</string>
     <string name="friction_gate_cancelled">Friction gate cancelled</string>
     <string name="custom_rules_subtitle">Manage your own custom distraction rules</string>
+    <string name="rule_updates_title">Update built-in rules</string>
+    <string name="rule_updates_subtitle">Downloads fixes to the built-in rules from GitHub once a day. Nothing about you or your screen is sent.</string>
+    <string name="rule_updates_url" translatable="false">https://raw.githubusercontent.com/digitalhabits/dh-focus-android/main/app/src/main/assets/distraction_rules.txt</string>
     <string name="pause_duration_title">Default Pause Duration</string>
     <string name="pause_duration_minutes">%d minutes</string>
     <string name="friction_gate_words">%d words</string>
