@@ -18,8 +18,8 @@
     <string name="picker_open_ambiguous">This label matches more than one element on this screen, so tapping it could hit the wrong one. Use Select less or Select more to pick a more specific element.</string>
     <string name="picker_open_unsupported">This element has no ID or label of its own, so it cannot be found again reliably. Use Select more to pick the button around it.</string>
     <string name="picker_close">Close picker</string>
-    <string name="picker_move_to_top">Move to top</string>
-    <string name="picker_move_to_bottom">Move to bottom</string>
+    <string name="picker_move_to_top">Move picker to top of screen</string>
+    <string name="picker_move_to_bottom">Move picker to bottom of screen</string>
     <string name="picker_no_element">No element found at this position</string>
     <string name="picker_deepest">This is already the smallest available selection</string>
     <string name="picker_shallowest">This is already the largest available selection</string>
