@@ -12,8 +12,12 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -957,5 +961,85 @@ public class ServiceConfigTest {
 
         assertTrue("the bundled row should have several parts", row.size() > 1);
         assertTrue(RuleRows.isRowEnabled(row));
+    }
+
+    // --- Downloaded rules ---
+
+    private void storeDownloadedRules(String... lines) throws IOException {
+        try (Writer writer = new OutputStreamWriter(new FileOutputStream(
+                new File(context.getFilesDir(), RuleUpdates.STORED_FILE)),
+                StandardCharsets.UTF_8)) {
+            writer.write(String.join("\n", lines));
+        }
+    }
+
+    private int countRulesWithIdentity(List<FilterRule> rules, FilterRule target) {
+        int count = 0;
+        for (FilterRule rule : rules) {
+            if (rule.identity().equals(target.identity())) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    @Test
+    public void ruleUpdatesAreOnByDefault() {
+        assertTrue(config.isRuleUpdatesEnabled());
+    }
+
+    @Test
+    public void downloadedRuleIsAddedAsABuiltInRule() throws IOException {
+        String line = "com.example.app##viewId=com.example.app:id/new##comment=Downloaded";
+        storeDownloadedRules(line);
+
+        List<FilterRule> rules = config.getRules();
+
+        assertEquals(1, countRulesWithIdentity(rules, createRule(line)));
+        for (FilterRule rule : rules) {
+            if (rule.identity().equals(createRule(line).identity())) {
+                assertFalse(rule.isCustom);
+            }
+        }
+    }
+
+    @Test
+    public void downloadedCopyOfABundledRuleIsNotAddedTwice() throws IOException {
+        FilterRule bundled = parseAsset("distraction_rules.txt").get(0);
+        storeDownloadedRules(bundled.ruleString);
+
+        assertEquals(1, countRulesWithIdentity(config.getRules(), bundled));
+    }
+
+    @Test
+    public void downloadedRulesAreIgnoredWhenUpdatesAreOff() throws IOException {
+        String line = "com.example.app##viewId=com.example.app:id/new##comment=Downloaded";
+        storeDownloadedRules(line);
+        config.setRuleUpdatesEnabled(false);
+
+        assertEquals(0, countRulesWithIdentity(config.getRules(), createRule(line)));
+    }
+
+    @Test
+    public void downloadedRuleWithAKeyThisVersionLacksIsDropped() throws IOException {
+        String line = "com.example.app##viewId=com.example.app:id/new"
+                + "##requiresFutureMarker=x##comment=Downloaded";
+        storeDownloadedRules(line);
+
+        assertEquals(0, countRulesWithIdentity(config.getRules(), createRule(line)));
+    }
+
+    /** A bundled rule using a key missing from the parser's known set could never be updated. */
+    @Test
+    public void everyBundledRuleUsesOnlyKnownKeys() throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                context.getAssets().open("distraction_rules.txt"), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.trim().isEmpty()) {
+                    assertTrue("unknown key in: " + line, FilterRuleParser.usesOnlyKnownKeys(line));
+                }
+            }
+        }
     }
 }

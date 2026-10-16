@@ -16,6 +16,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.materialswitch.MaterialSwitch;
 
 import net.kollnig.distractionlib.FrictionGateActivity;
 import net.kollnig.distractionlib.FilterRuleParser;
@@ -72,6 +73,17 @@ public class SettingsActivity extends AppCompatActivity {
         tvCustomRulesSubtitle = findViewById(R.id.tv_custom_rules_subtitle);
 
         updateSubtitles();
+
+        MaterialSwitch ruleUpdatesSwitch = findViewById(R.id.switch_rule_updates);
+        ruleUpdatesSwitch.setChecked(config.isRuleUpdatesEnabled());
+        ruleUpdatesSwitch.setOnCheckedChangeListener((button, enabled) -> {
+            config.setRuleUpdatesEnabled(enabled);
+            RuleUpdates.sync(this);
+            DistractionControlService svc = DistractionControlService.getInstance();
+            if (svc != null) {
+                svc.updateRules();
+            }
+        });
 
         findViewById(R.id.btn_custom_rules).setOnClickListener(v -> startActivity(new Intent(SettingsActivity.this, CustomRulesActivity.class)));
 

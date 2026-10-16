@@ -459,4 +459,27 @@ public class FilterRuleParserTest {
         assertFalse(rules.get(0).isPaused);
         assertEquals(0, rules.get(0).pausedUntil);
     }
+
+    // --- Keys this version understands ---
+
+    @Test
+    public void ruleUsingOnlyKnownKeysIsAccepted() {
+        assertTrue(FilterRuleParser.usesOnlyKnownKeys(
+                "com.example##category=Feed##viewId=com.example:id/list"
+                        + "##childPath=android.view.ViewGroup[*]##hasThumbnail=true"
+                        + "##requiresSelected=com.example:id/tabs>android.widget.Button[0]"
+                        + "##comment=Hide feed##blockTouches=false"));
+    }
+
+    @Test
+    public void ruleUsingAnUnknownKeyIsRejected() {
+        assertFalse(FilterRuleParser.usesOnlyKnownKeys(
+                "com.example##viewId=com.example:id/list##requiresFutureMarker=x##comment=Hide"));
+    }
+
+    @Test
+    public void lineThatIsNotARuleIsRejected() {
+        assertFalse(FilterRuleParser.usesOnlyKnownKeys("// a comment"));
+        assertFalse(FilterRuleParser.usesOnlyKnownKeys("##viewId=com.example:id/list"));
+    }
 }
