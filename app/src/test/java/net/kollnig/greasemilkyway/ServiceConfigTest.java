@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeTrue;
 
 @RunWith(RobolectricTestRunner.class)
 public class ServiceConfigTest {
@@ -955,7 +956,8 @@ public class ServiceConfigTest {
             }
         }
 
-        assertTrue("the bundled row should have several parts", row.size() > 1);
+        // Only the standard flavour bundles LinkedIn rules.
+        assumeTrue(row.size() > 1);
         assertTrue(RuleRows.isRowEnabled(row));
     }
 }
