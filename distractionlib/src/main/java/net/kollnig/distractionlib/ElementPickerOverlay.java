@@ -269,7 +269,15 @@ public class ElementPickerOverlay {
         infoText.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         infoText.setText(R.string.picker_hint);
         infoText.setMaxLines(2);
-        controlBar.addView(infoText);
+
+        LinearLayout headerRow = new LinearLayout(service);
+        headerRow.setOrientation(LinearLayout.HORIZONTAL);
+        headerRow.setGravity(Gravity.CENTER_VERTICAL);
+        headerRow.addView(infoText, new LinearLayout.LayoutParams(
+                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        headerRow.addView(createCloseButton(textColor),
+                new LinearLayout.LayoutParams(dpToPx(48), dpToPx(48)));
+        controlBar.addView(headerRow);
 
         technicalInfoText = new TextView(service);
         technicalInfoText.setTextColor(secondaryTextColor);
@@ -306,10 +314,6 @@ public class ElementPickerOverlay {
         moveButton = createSecondaryButton("", textColor, v -> toggleControlBarPosition());
         updateMoveButtonLabel();
         panelRow.addView(moveButton, createButtonParams());
-        Button closeButton = createSecondaryButton(service.getString(R.string.picker_close),
-                textColor, v -> dismissPicker());
-        closeButton.setContentDescription(service.getString(R.string.picker_close));
-        panelRow.addView(closeButton, createButtonParams());
         controlBar.addView(panelRow);
 
         LinearLayout actions = new LinearLayout(service);
@@ -432,6 +436,24 @@ public class ElementPickerOverlay {
         btn.setMinimumHeight(dpToPx(48));
         btn.setOnClickListener(onClick);
         return btn;
+    }
+
+    private TextView createCloseButton(int textColor) {
+        TextView close = new TextView(service);
+        close.setText("\u2715");
+        close.setTextSize(20f);
+        close.setTextColor(textColor);
+        close.setGravity(Gravity.CENTER);
+        close.setContentDescription(service.getString(R.string.picker_close));
+        GradientDrawable background = new GradientDrawable();
+        background.setShape(GradientDrawable.OVAL);
+        background.setColor(Color.argb(20,
+                Color.red(textColor), Color.green(textColor), Color.blue(textColor)));
+        close.setBackground(background);
+        close.setClickable(true);
+        close.setFocusable(true);
+        close.setOnClickListener(v -> dismissPicker());
+        return close;
     }
 
     private Button createPrimaryButton(String text, int bgColor) {
