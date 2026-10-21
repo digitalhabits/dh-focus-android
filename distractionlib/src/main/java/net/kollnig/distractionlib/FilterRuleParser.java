@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +25,36 @@ public class FilterRuleParser {
 
     /** Below this an image is an icon, not a thumbnail, so smaller widths are rejected. */
     private static final int MIN_ACCEPTED_THUMBNAIL_WIDTH_DP = 48;
+
+    /**
+     * Every key {@link #parseRules} reads. A key added there must be added here too, or
+     * downloaded rules that use it are dropped by {@link #usesOnlyKnownKeys}.
+     */
+    private static final Set<String> KNOWN_KEYS = new HashSet<>(Arrays.asList(
+            "viewId", "desc", "color", "blockTouches", "className", "text", "path",
+            "childPath", "hasThumbnail", "requiresViewId", "requiresSelected", "descMatch",
+            "comment", "category"));
+
+    /**
+     * Whether this version understands every key in a rule line.
+     *
+     * <p>{@link #parseRules} skips keys it does not know, which is harmless for rules shipped
+     * with the same build but not for rules written for a newer one: a newer key usually
+     * narrows a rule, and skipping it applies the rule more widely than it was written.
+     */
+    public static boolean usesOnlyKnownKeys(String line) {
+        String[] parts = line.split("##");
+        if (parts.length < 2 || parts[0].trim().isEmpty()) {
+            return false;
+        }
+        for (int i = 1; i < parts.length; i++) {
+            String part = parts[i];
+            if (part.contains("=") && !KNOWN_KEYS.contains(part.split("=", 2)[0].trim())) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
      * Parses raw filter rules into structured FilterRule objects.

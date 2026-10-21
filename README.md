@@ -37,7 +37,7 @@ The app also includes:
 ## Privacy
 
 Digital Habits: Focus:
-- runs entirely on-device
+- runs on-device; its only network request is a daily download of the built-in rules from this repository on GitHub, which can be turned off in Settings
 - does not require an account
 - does not collect or transmit personal data
 - uses accessibility access only to detect and hide configured interface elements

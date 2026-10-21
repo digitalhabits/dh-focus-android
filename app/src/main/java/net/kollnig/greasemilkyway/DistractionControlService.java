@@ -77,6 +77,7 @@ public class DistractionControlService extends BaseDistractionControlService {
     protected void onServiceReady() {
         instance = this;
         config = new ServiceConfig(this);
+        RuleUpdates.sync(this);
 
         pickerNotification = new ElementPickerNotification(this);
         pauseNotification = new PauseNotification(this);
