@@ -16,11 +16,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeTrue;
 
 @RunWith(RobolectricTestRunner.class)
 public class ServiceConfigTest {
@@ -870,5 +872,92 @@ public class ServiceConfigTest {
             assertNotNull("no comment: " + rule.ruleString, rule.description);
             assertFalse("blank comment: " + rule.ruleString, rule.description.trim().isEmpty());
         }
+    }
+
+    // --- New rules joining an existing row ---
+
+    @Test
+    public void newSiblingTakesTheEnabledStateOfItsRow() {
+        FilterRule saved = createRule("com.example.app##viewId=old##comment=Hide feed");
+        FilterRule added = createRule("com.example.app##viewId=new##comment=Hide feed");
+        config.setRuleEnabled(saved, true);
+
+        config.inheritSiblingState(Arrays.asList(saved, added));
+
+        assertTrue(config.isRuleEnabled(added));
+    }
+
+    @Test
+    public void newSiblingTakesThePauseOfItsRow() {
+        FilterRule saved = createRule("com.example.app##viewId=old##comment=Hide feed");
+        FilterRule added = createRule("com.example.app##viewId=new##comment=Hide feed");
+        long pausedUntil = System.currentTimeMillis() + 60000;
+        config.setRuleEnabled(saved, false);
+        config.setRulePausedUntil(saved, pausedUntil);
+
+        config.inheritSiblingState(Arrays.asList(saved, added));
+
+        assertFalse(config.isRuleEnabled(added));
+        assertEquals(pausedUntil, config.getRulePausedUntil(added));
+    }
+
+    @Test
+    public void ruleWithItsOwnSavedStateKeepsIt() {
+        FilterRule on = createRule("com.example.app##viewId=old##comment=Hide feed");
+        FilterRule off = createRule("com.example.app##viewId=new##comment=Hide feed");
+        config.setRuleEnabled(on, true);
+        config.setRuleEnabled(off, false);
+
+        config.inheritSiblingState(Arrays.asList(on, off));
+
+        assertFalse(config.isRuleEnabled(off));
+    }
+
+    @Test
+    public void rowStateIsNotTakenFromAnotherAppOrACustomRule() {
+        FilterRule saved = createRule("com.example.app##viewId=old##comment=Hide feed");
+        FilterRule otherApp = createRule("com.example.other##viewId=new##comment=Hide feed");
+        FilterRule custom = createRule("com.example.app##viewId=custom##comment=Hide feed");
+        custom.isCustom = true;
+        config.setRuleEnabled(saved, true);
+
+        config.inheritSiblingState(Arrays.asList(saved, otherApp, custom));
+
+        assertFalse(config.isRuleEnabled(otherApp));
+        assertFalse(config.isRuleEnabled(custom));
+        assertFalse(config.getPrefs().contains(
+                ServiceConfig.KEY_RULE_ENABLED + ServiceConfig.ruleKeySuffix(otherApp)));
+    }
+
+    @Test
+    public void rowWithNoSavedStateStaysUnsaved() {
+        FilterRule first = createRule("com.example.app##viewId=old##comment=Hide feed");
+        FilterRule second = createRule("com.example.app##viewId=new##comment=Hide feed");
+
+        config.inheritSiblingState(Arrays.asList(first, second));
+
+        assertFalse(config.getPrefs().contains(
+                ServiceConfig.KEY_RULE_ENABLED + ServiceConfig.ruleKeySuffix(second)));
+    }
+
+    @Test
+    public void getRulesKeepsABundledRowOnWhenARuleIsAddedToIt() {
+        FilterRule old = createRule("com.linkedin.android##category=Feed##viewId="
+                + "com.linkedin.android:id/feed_item_update_card##comment=Hide feed item"
+                + "##blockTouches=false");
+        config.setPackageDisabled("com.linkedin.android", false);
+        config.setRuleEnabled(old, true);
+
+        List<FilterRule> row = new ArrayList<>();
+        for (FilterRule rule : config.getRules()) {
+            if ("com.linkedin.android".equals(rule.packageName)
+                    && "Hide feed item".equals(rule.description)) {
+                row.add(rule);
+            }
+        }
+
+        // Only the standard flavour bundles LinkedIn rules.
+        assumeTrue(row.size() > 1);
+        assertTrue(RuleRows.isRowEnabled(row));
     }
 }
